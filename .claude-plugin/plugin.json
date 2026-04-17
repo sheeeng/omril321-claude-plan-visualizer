@@ -1,0 +1,19 @@
+{
+  "name": "plan-visualizer",
+  "description": "Generates self-contained HTML visualizations from markdown implementation plans showing BEFORE/AFTER architecture, diff-marked components, key decisions, and risks",
+  "version": "1.0.0",
+  "author": {
+    "name": "Omri Lavi"
+  },
+  "repository": "https://github.com/omril321/claude-plan-visualizer",
+  "license": "MIT",
+  "keywords": [
+    "plan",
+    "visualization",
+    "architecture",
+    "html",
+    "diff",
+    "before-after",
+    "implementation-plan"
+  ]
+}

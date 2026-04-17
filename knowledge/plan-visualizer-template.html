@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{PLAN_TITLE}}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a1628;
+    color: #e0e8f0;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .infographic {
+    max-width: 1200px;
+    margin: 0 auto;
+    border: 1px solid #00d4ff33;
+    border-radius: 8px;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 10px #00d4ff22; }
+    50% { box-shadow: 0 0 20px #00d4ff33, 0 0 40px #00d4ff11; }
+  }
+  .flow-step {
+    animation: fadeSlideIn 0.35s ease both;
+  }
+  .flow-step:nth-child(1)  { animation-delay: 0.05s; }
+  .flow-step:nth-child(2)  { animation-delay: 0.10s; }
+  .flow-step:nth-child(3)  { animation-delay: 0.15s; }
+  .flow-step:nth-child(4)  { animation-delay: 0.20s; }
+  .flow-step:nth-child(5)  { animation-delay: 0.25s; }
+  .flow-step:nth-child(6)  { animation-delay: 0.30s; }
+  .flow-step:nth-child(7)  { animation-delay: 0.35s; }
+  .flow-step:nth-child(8)  { animation-delay: 0.40s; }
+  .flow-step:nth-child(9)  { animation-delay: 0.45s; }
+  .flow-step:nth-child(10) { animation-delay: 0.50s; }
+  .flow-step:nth-child(11) { animation-delay: 0.55s; }
+  .flow-step:nth-child(12) { animation-delay: 0.60s; }
+  .bottom-panel {
+    animation: fadeSlideIn 0.3s ease both;
+  }
+  .bottom-panel:nth-child(1) { animation-delay: 0.15s; }
+  .bottom-panel:nth-child(2) { animation-delay: 0.20s; }
+  .bottom-panel:nth-child(3) { animation-delay: 0.25s; }
+  .bottom-panel:nth-child(4) { animation-delay: 0.30s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 18px 28px;
+    border-bottom: 1px solid #00d4ff33;
+    background: #0d1f35;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .header-left h1 { font-size: 20px; font-weight: 600; color: #fff; }
+  .header-left .subtitle { font-size: 12px; color: #00d4ff; margin-top: 5px; line-height: 1.5; }
+  .header-right { display: flex; flex-direction: column; gap: 6px; text-align: right; flex-shrink: 0; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .badge-profile { color: #00d4ff; background: #00d4ff15; border: 1px solid #00d4ff33; }
+  .badge-scope   { color: #a0b8c8; background: #ffffff08; border: 1px solid #ffffff15; }
+  .badge-generated { color: #556677; background: transparent; font-size: 9px; }
+  .plan-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #00d4ff;
+    background: #00d4ff12;
+    border: 1px solid #00d4ff44;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    margin-top: 4px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .plan-link:hover { background: #00d4ff22; border-color: #00d4ff88; }
+  .plan-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; opacity: 0.8; }
+
+  /* ── Change legend ── */
+  .legend {
+    display: flex; gap: 20px; padding: 8px 28px;
+    border-bottom: 1px solid #00d4ff22; background: #060e1a;
+    font-size: 10px; color: #667788;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .ld-added   { background: #0f2640; border: 1px solid #00d4ff; }
+  .ld-changed { background: #191008; border: 1px solid #f0a030cc; }
+  .ld-removed { background: #140808; border: 1px dashed #ff505077; }
+  .ld-same    { background: #0a1628; border: 1px solid #ffffff20; opacity: 0.85; }
+
+  /* ── Panels ── */
+  .panels { display: grid; grid-template-columns: 1fr 2px 1fr; }
+  .panel { padding: 20px 24px; }
+  .panel-label {
+    font-size: 13px; font-weight: 700; color: #00d4ff;
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #00d4ff22;
+  }
+  .divider { background: #00d4ff66; box-shadow: 0 0 12px #00d4ff44; }
+
+  /* ── Flow boxes (base) ── */
+  .flow-step { margin-bottom: 4px; }
+  .flow-box {
+    border: 1px solid #00d4ff33; border-radius: 4px; padding: 8px 12px; background: #0d1f35;
+    transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .flow-box:hover {
+    transform: translateY(-1px);
+    border-color: #00d4ff66;
+    box-shadow: 0 2px 12px #00d4ff15;
+  }
+
+  /* Change-status variants — apply ONLY on .flow-box, never on .flow-step */
+  .flow-box.unchanged { border-color: #ffffff22; background: #0a1628; opacity: 0.85; }
+  .flow-box.unchanged:hover { opacity: 1; border-color: #ffffff44; }
+  .flow-box.changed   { border-color: #f0a030cc; background: #191008; }
+  .flow-box.changed:hover { border-color: #f0a030; box-shadow: 0 2px 12px #f0a03015; }
+  .flow-box.removed   { border: 1px dashed #ff505077; background: #140808; }
+  .flow-box.removed:hover { border-color: #ff5050aa; box-shadow: 0 2px 12px #ff505015; }
+  .flow-box.added     { border-color: #00d4ff; background: #0f2640; animation: glowPulse 3s ease-in-out infinite; }
+  .flow-box.added:hover { box-shadow: 0 0 15px #00d4ff33, 0 2px 12px #00d4ff15; transform: translateY(-1px); }
+  .flow-box.missing   { border: 1px dashed #ff505044; background: #100808; }
+
+  .flow-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .tag {
+    font-size: 10px; padding: 1px 6px; border-radius: 3px;
+    margin-left: 6px; vertical-align: middle; font-weight: 600;
+  }
+  .tag-added   { color: #00d4ff; background: #00d4ff18; border: 1px solid #00d4ff44; }
+  .tag-changed { color: #f0a030; background: #f0a03018; border: 1px solid #f0a03044; }
+  .tag-removed { color: #ff6060; background: #ff606018; border: 1px solid #ff606044; }
+  .tag-same    { color: #667788; background: #ffffff08; border: 1px solid #ffffff15; }
+  .tag-missing { color: #ff6060; background: #ff000010; border: 1px solid #ff606033; }
+  .tag-new     { color: #00d4ff; background: #00d4ff15; border: 1px solid #00d4ff44; }
+
+  .flow-bullets { margin-top: 5px; padding-left: 2px; list-style: none; }
+  .flow-bullets li {
+    font-size: 11px; color: #8899aa;
+    padding-left: 10px; position: relative; line-height: 1.5; margin-bottom: 1px;
+  }
+  .flow-bullets li::before { content: '·'; position: absolute; left: 0; color: #00d4ff55; }
+  .flow-bullets.dim li { color: #8a9fb5; }
+
+  /* ── Connectors ── */
+  .flow-arrow {
+    display: flex; align-items: center; gap: 8px;
+    margin: 8px 0 8px 16px;
+    color: #00d4ffaa; font-size: 11px; font-weight: 500;
+  }
+  .flow-arrow::before {
+    content: ''; display: block; width: 2px; height: 20px;
+    background: linear-gradient(to bottom, #00d4ff44, #00d4ffaa);
+    flex-shrink: 0; border-radius: 1px;
+  }
+  .flow-arrow .ah { font-size: 14px; color: #00d4ffcc; flex-shrink: 0; margin-left: -4px; }
+
+  /* ── Bottom sections (stacked vertically) ── */
+  .bottom { border-top: 2px solid #00d4ff44; background: #060e1a; }
+  .bottom-panel { padding: 14px 28px; border-bottom: 1px solid #00d4ff33; }
+  .bottom-panel:last-child { border-bottom: none; }
+  .bottom-label {
+    font-size: 10px; font-weight: 700; color: #00d4ff;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 9px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .bottom-label .si { font-size: 13px; line-height: 1; }
+  .bi-items { display: block; }
+  .bi { font-size: 11px; color: #c0ccd8; margin-bottom: 5px; line-height: 1.5; padding-left: 18px; position: relative; display: block; }
+
+  /* ── Bottom bar icons (inline SVG via CSS data URIs — zero CDN dependency) ── */
+  .bi::before {
+    content: '';
+    position: absolute; left: 0; top: 1px;
+    width: 12px; height: 12px;
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+  }
+  .bi.change::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E");
+  }
+  .bi.decision::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z'/%3E%3C/svg%3E");
+  }
+  .bi.risk::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f0a030' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
+  }
+  .bi.scope::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23667788' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E");
+  }
+  .bi.success::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2340d080' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");
+  }
+  .bi.deferred::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23667788' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='10' x2='10' y1='15' y2='9'/%3E%3Cline x1='14' x2='14' y1='15' y2='9'/%3E%3C/svg%3E");
+  }
+
+  code { background: #00d4ff10; padding: 1px 4px; border-radius: 2px; font-size: inherit; color: #e0e8f0; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .header { flex-direction: column; gap: 12px; }
+    .header-right { text-align: left; }
+    .panels { grid-template-columns: 1fr; }
+    .divider { height: 2px; width: 100%; }
+    .bottom-panel { padding: 12px 16px; }
+  }
+  @media (max-width: 480px) {
+    .legend { flex-wrap: wrap; gap: 10px; }
+    .bottom-panel { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="infographic">
+
+  <!-- ═══════════════════════════════════════════════════════
+       HEADER
+       - h1: Plan title (from ## Summary Goal line, max 8 words)
+       - subtitle: 1-2 sentence description of the transformation
+       - badge-profile: profile + reason (e.g. "standard profile")
+         CONDITIONAL: omit this element entirely if plan has no **Profile:** line
+       - badge-scope: N files · N steps
+       - plan-link: href uses file:///ABSOLUTE_PATH_TO_PLAN_FILE
+       ═══════════════════════════════════════════════════════ -->
+  <div class="header">
+    <div class="header-left">
+      <h1>{{PLAN_TITLE}}</h1>
+      <div class="subtitle">{{SUBTITLE}}</div>
+    </div>
+    <div class="header-right">
+      <!-- Include ONLY if plan has a **Profile:** line; omit entirely otherwise -->
+      <span class="badge badge-profile">{{PROFILE}} profile</span>
+      <span class="badge badge-scope">{{N_FILES}} files · {{N_STEPS}} steps</span>
+      <a class="plan-link" href="file:///{{PLAN_FILE_ABSOLUTE_PATH}}">
+        <svg viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+        {{PLAN_FILE_BASENAME}}
+      </a>
+      <span class="badge badge-generated">Generated {{DATE}}</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LEGEND — always include when plan has code/arch changes
+       Remove entirely for operational/workflow plans
+       ═══════════════════════════════════════════════════════ -->
+  <div class="legend">
+    <span style="color: #445566; margin-right: 4px;">CHANGE KEY:</span>
+    <span class="legend-item"><span class="legend-dot ld-added"></span>Added</span>
+    <span class="legend-item"><span class="legend-dot ld-changed"></span>Changed</span>
+    <span class="legend-item"><span class="legend-dot ld-removed"></span>Removed</span>
+    <span class="legend-item"><span class="legend-dot ld-same"></span>Unchanged</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN PANELS (BEFORE / AFTER)
+
+       Panel labels — choose based on plan type:
+         Migration/Refactor:  BEFORE / AFTER
+         Feature Addition:    BEFORE / AFTER  (no-feature → with-feature)
+         Bug Fix:             BROKEN / FIXED
+         Workflow/Ops:        CURRENT / TARGET
+
+       Each panel contains flow-step blocks:
+         1. flow-box with class: added | changed | removed | unchanged | missing
+            IMPORTANT: These classes go ONLY on .flow-box, never on .flow-step
+         2. flow-name with the component name
+         3. tag span: tag-added | tag-changed | tag-removed | tag-same | tag-missing
+         4. flow-bullets: SHORT bullet points (max ~80 chars each)
+            - What this component does in this state
+            - Key config values, params, constraints
+            - NOT: long prose. Short, specific facts only. Max ~90 chars per bullet.
+         5. flow-arrow between steps: <div class="flow-arrow"><span class="ah">↓</span> optional label</div>
+
+       RULES:
+       - Max 6 flow-steps per panel
+       - Max 4 bullets per box
+       - Unchanged boxes use .dim on flow-bullets (grey text)
+       - Mirror same component names across BEFORE/AFTER where they persist
+       - Only show in BEFORE what gets REMOVED or CHANGED
+       - Only show in AFTER what gets ADDED or CHANGED (+ unchanged anchors for context)
+       ═══════════════════════════════════════════════════════ -->
+  <div class="panels">
+
+    <!-- BEFORE / BROKEN / CURRENT -->
+    <div class="panel">
+      <div class="panel-label">{{LEFT_LABEL}}</div>
+
+      <!-- Example: a changed component -->
+      <div class="flow-step">
+        <div class="flow-box changed">
+          <div class="flow-name">ComponentName <span class="tag tag-changed">CHANGED</span></div>
+          <ul class="flow-bullets">
+            <li>Short fact about current behavior</li>
+            <li>Key config or constraint in this state</li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow-arrow"><span class="ah">↓</span> optional label</div>
+
+      <!-- Example: a removed component -->
+      <div class="flow-step">
+        <div class="flow-box removed">
+          <div class="flow-name">RemovedComponent <span class="tag tag-removed">REMOVED</span></div>
+          <ul class="flow-bullets">
+            <li>What this did and why it's going away</li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow-arrow"><span class="ah">↓</span></div>
+
+      <!-- Example: an unchanged anchor -->
+      <div class="flow-step">
+        <div class="flow-box unchanged">
+          <div class="flow-name">UnchangedComponent <span class="tag tag-same">UNCHANGED</span></div>
+          <ul class="flow-bullets dim">
+            <li>Brief note on what this does (dim, less emphasis)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- AFTER / FIXED / TARGET -->
+    <div class="panel">
+      <div class="panel-label">{{RIGHT_LABEL}}</div>
+
+      <!-- Example: same component, now changed -->
+      <div class="flow-step">
+        <div class="flow-box changed">
+          <div class="flow-name">ComponentName <span class="tag tag-changed">CHANGED</span></div>
+          <ul class="flow-bullets">
+            <li>What changed and what it does now</li>
+            <li>New behavior or config</li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow-arrow"><span class="ah">↓</span></div>
+
+      <!-- Example: a new component -->
+      <div class="flow-step">
+        <div class="flow-box added">
+          <div class="flow-name">NewComponent <span class="tag tag-added">ADDED</span></div>
+          <ul class="flow-bullets">
+            <li>What this new thing does</li>
+            <li>Key config values, e.g. <code>param: value</code></li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow-arrow"><span class="ah">↓</span></div>
+
+      <!-- Same unchanged anchor -->
+      <div class="flow-step">
+        <div class="flow-box unchanged">
+          <div class="flow-name">UnchangedComponent <span class="tag tag-same">UNCHANGED</span></div>
+          <ul class="flow-bullets dim">
+            <li>Same as before</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       BOTTOM SECTIONS (stacked vertically, full width)
+
+       Include only the sections that have meaningful content.
+       Recommended: Key Changes, Key Decisions, Risks.
+       Optional: Out of Scope, Success Criteria, Deferred.
+
+       Section labels — use exactly these emoji + names:
+         🔀 Key Changes   — what moved, renamed, replaced
+         💡 Key Decisions — architectural choices + rationale
+         ⚠️ Risks         — what could go wrong + mitigation
+         ❎ Out of Scope  — explicitly excluded items
+         ✅ Success Criteria — definition of done
+         ⏸ Deferred      — punted to a later step/task
+
+       Item types (icons rendered via CSS data-URI SVGs — no JS needed):
+         .bi.change   → key changes
+         .bi.decision → architectural choices
+         .bi.risk     → risks
+         .bi.scope    → out of scope
+         .bi.success  → success criteria
+         .bi.deferred → deferred items
+
+       Items wrap into 2 columns on wide screens (.bi-items flex-wrap).
+
+       RULES:
+       - Max 5 items per section
+       - Short sentences (max ~120 chars each)
+       - Use <code> for symbols, function names, file paths
+       ═══════════════════════════════════════════════════════ -->
+  <div class="bottom">
+    <div class="bottom-panel">
+      <div class="bottom-label"><span class="si">🔀</span> Key Changes</div>
+      <div class="bi-items">
+        <div class="bi change">Short description of change 1 with <code>code ref</code></div>
+        <div class="bi change">Short description of change 2</div>
+        <div class="bi change">Short description of change 3</div>
+      </div>
+    </div>
+    <div class="bottom-panel">
+      <div class="bottom-label"><span class="si">💡</span> Key Decisions</div>
+      <div class="bi-items">
+        <div class="bi decision">Architectural choice made and brief rationale</div>
+        <div class="bi decision">Another decision with its tradeoff noted</div>
+      </div>
+    </div>
+    <div class="bottom-panel">
+      <div class="bottom-label"><span class="si">⚠️</span> Risks</div>
+      <div class="bi-items">
+        <div class="bi risk">Risk 1 — what could go wrong + mitigation if known</div>
+        <div class="bi risk">Risk 2</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
