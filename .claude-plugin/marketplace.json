@@ -5,18 +5,18 @@
   },
   "metadata": {
     "description": "A marketplace for the plan-visualizer Claude Code plugin",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "pluginRoot": "./"
   },
   "plugins": [
     {
       "name": "plan-visualizer",
       "source": "./",
-      "description": "Generates self-contained HTML visualizations from markdown implementation plans showing BEFORE/AFTER architecture, diff-marked components, key decisions, and risks",
-      "version": "1.0.0",
+      "description": "Generates self-contained HTML visualizations from markdown implementation plans showing BEFORE/AFTER architecture, diff-marked components, mermaid diagrams, interactive feedback, key decisions, and risks",
+      "version": "1.1.0",
       "category": "productivity",
       "tags": ["visualization", "planning"],
-      "keywords": ["plan", "architecture", "html", "diff", "before-after"]
+      "keywords": ["plan", "architecture", "html", "diff", "before-after", "mermaid", "feedback"]
     }
   ]
 }

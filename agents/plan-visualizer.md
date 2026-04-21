@@ -1,6 +1,6 @@
 ---
 name: plan-visualizer
-description: "Generates self-contained HTML visualizations from markdown implementation plans showing BEFORE/AFTER architecture, diff-marked components (ADDED/CHANGED/REMOVED/UNCHANGED), key decisions, and risks. Use when a software implementation plan has been completed and needs a visual technical summary. Invoked manually when user asks to visualize a plan, or automatically by planning skills. Outputs an HTML file, not an image."
+description: "Generates self-contained HTML visualizations from markdown implementation plans showing BEFORE/AFTER architecture, diff-marked components, key decisions, and risks. Use when a software implementation plan needs a visual technical summary. TRIGGER when user says \"visualize this plan\", \"generate plan visualization\", \"create plan diagram\", or \"show plan architecture\". Outputs an HTML file, not an image."
 model: sonnet
 color: green
 tools: [Read, Write, Glob, Edit]
@@ -33,6 +33,22 @@ You need two things:
 
 Read the plan file completely before doing anything else.
 
+### Step 1.5 — Read configuration
+
+Read the config file at `~/.claude/plan-visualizer.json` using the Read tool.
+
+**Expected format:**
+```json
+{"url_protocol": "open-cursor"}
+```
+
+**Supported fields:**
+- `url_protocol` — the URL protocol for plan file links (e.g., `"file"`, `"open-cursor"`, `"vscode"`). Default: `"file"`
+
+**If the file does not exist or is unreadable:** use `"file"` as the default protocol. Do not stop or report an error — this is expected for first-time users.
+
+Store the protocol value for use in Steps 9 and 11.
+
 ### Step 2 — Check skip criteria
 
 Read the plan's Summary section (if present) — you already have the file content from Step 1. Apply the skip criteria above. If skipping:
@@ -58,7 +74,7 @@ Before extracting content, check what structure the plan provides. The agent wor
 
 **Never refuse to generate.** If the plan has at least 2 headings and some descriptive content, proceed with extraction. Gracefully omit any sections that are absent rather than stopping.
 
-**Recommended sections for richer output:** `**What changes:**`, `**Risks:**`, `**Key decisions:**`, `## Steps`. If absent, omit those bottom sections from the output rather than inventing content.
+**Recommended sections for richer output:** `**What changes:**`, `**Risks:**`, `**Key decisions:**`, `## Steps`, `## Assumptions`, `## Success Criteria`, `## Scope Definition`. If absent, omit those sections from the output rather than inventing content.
 
 ### Step 4 — Classify the plan
 
@@ -96,6 +112,16 @@ Read these sections of the plan and extract content for each zone:
 - Use `.added` for new components, `.changed` for modified ones, `.unchanged` for stable anchors
 - Mirror component names that appear in both panels
 
+**IMPLEMENTATION STEPS** — from `## Steps` / `### Step N` headings:
+- Extract ALL step descriptions and their verification criteria
+- Format: "Step N — Description · Verify: criterion"
+- Max 5 items — pick the most important steps if more exist
+
+**SUCCESS CRITERIA** — from `## Success Criteria`:
+- Extract all observable/testable criteria
+- Always include when the section exists in the plan (not optional)
+- Max 5 items
+
 **KEY CHANGES** — from `## Summary` What changes list:
 - 3-5 bullet items summarizing what moved, was replaced, or was renamed
 - One short sentence each, include `<code>` for file/function names
@@ -106,6 +132,14 @@ Read these sections of the plan and extract content for each zone:
 
 **RISKS** — from `## Summary` Risks:
 - 2-3 items, each one fact + brief mitigation if stated in plan
+
+**ASSUMPTIONS** (optional extra section) — from `## Assumptions`:
+- Include if plan has explicit assumptions that reviewers should verify
+- 2-4 items with `.bi.assumption` class
+
+**IN SCOPE** (optional extra section) — from `## Scope Definition` In Scope:
+- Include if plan has explicit in-scope items
+- 2-4 items with `.bi.success` class
 
 **OUT OF SCOPE** (optional extra section) — from `## Scope Definition` Out of Scope:
 - Include if plan has explicit out-of-scope items that reviewers might wonder about
@@ -123,12 +157,74 @@ Each bottom section uses this HTML structure:
 ```
 
 Section label emoji — use exactly:
+- 📋 Implementation Steps
+- ✅ Success Criteria
 - 🔀 Key Changes
 - 💡 Key Decisions
 - ⚠️ Risks
+- 🔍 Assumptions
+- ✅ In Scope
 - ❎ Out of Scope
-- ✅ Success Criteria
 - ⏸ Deferred
+
+**Bottom section limit: max 5 sections.** Prioritize in this order:
+Implementation Steps > Success Criteria > Key Changes > Key Decisions > Risks > Assumptions > In Scope > Out of Scope > Deferred
+
+### Step 5.5 — Generate architecture diagram (mermaid)
+
+Decide whether to include a mermaid architecture overview diagram:
+
+**Include when:** the plan has 3+ components with relationships (dependencies, data flow, call chains, or architectural layers). This covers most plans.
+
+**Skip when:** the plan has 2-3 independent components with no relationships, or is a simple linear change.
+
+If including, generate a mermaid graph definition:
+
+1. Choose direction: `graph TD` (top-down, for layered architectures) or `graph LR` (left-right, for pipelines/flows)
+2. Create nodes for each significant component mentioned in the plan
+3. Add edges showing relationships (calls, depends on, produces, reads)
+4. Apply classDef for diff status:
+
+```
+classDef added fill:#0f2640,stroke:#00d4ff,stroke-width:2px,color:#e0e8f0
+classDef changed fill:#191008,stroke:#f0a030,stroke-width:2px,color:#e0e8f0
+classDef removed fill:#140808,stroke:#ff5050,stroke-width:2px,stroke-dasharray:5 5,color:#e0e8f0
+classDef unchanged fill:#0a1628,stroke:#ffffff33,color:#8899aa
+```
+
+**Example 1 — migration plan:**
+```
+graph TD
+  A["Agent Prompt<br/><small>plan-visualizer.md</small>"]:::changed --> B["HTML Template<br/><small>template.html</small>"]:::changed
+  A --> C["Config File<br/><small>~/.claude/plan-visualizer.json</small>"]:::added
+  B --> D["Mermaid.js<br/><small>unpkg CDN</small>"]:::added
+  B --> E["Feedback System<br/><small>vanilla JS</small>"]:::added
+  B --> F["Flow Boxes<br/><small>existing CSS</small>"]:::unchanged
+  classDef added fill:#0f2640,stroke:#00d4ff,stroke-width:2px,color:#e0e8f0
+  classDef changed fill:#191008,stroke:#f0a030,stroke-width:2px,color:#e0e8f0
+  classDef removed fill:#140808,stroke:#ff5050,stroke-width:2px,stroke-dasharray:5 5,color:#e0e8f0
+  classDef unchanged fill:#0a1628,stroke:#ffffff33,color:#8899aa
+```
+
+**Example 2 — bug fix:**
+```
+graph LR
+  A["Request Handler"]:::unchanged --> B["Auth Middleware"]:::changed
+  B --> C["Token Validator"]:::changed
+  C --> D["Database"]:::unchanged
+  classDef changed fill:#191008,stroke:#f0a030,stroke-width:2px,color:#e0e8f0
+  classDef unchanged fill:#0a1628,stroke:#ffffff33,color:#8899aa
+```
+
+**Mermaid syntax rules:**
+- Wrap ALL node labels in double quotes: `A["Label text"]`
+- Escape `<` and `>` with `&lt;` and `&gt;` in labels
+- Use `<br/>` for line breaks within labels
+- Use `<small>...</small>` for secondary text (file paths)
+- Avoid `()` `{}` `[]` in label text (only as mermaid node shape delimiters)
+- Use subgraphs for logical grouping when 5+ nodes: `subgraph "Group Name" ... end`
+- Max 8-10 nodes per diagram
+- Always include the classDef definitions at the end of the mermaid block
 
 ### Step 6 — Apply diff markup rules
 
@@ -182,6 +278,8 @@ Before inserting any plan content into HTML, escape these characters:
 
 **Exception:** You may add `<code>`, `<ul>`, `<li>`, and `<span>` tags yourself where appropriate. But any text extracted from the plan file must be escaped. For example, a plan bullet mentioning `Array<T>` must become `Array&lt;T&gt;` in the HTML.
 
+**Mermaid exception:** Content inside `<div class="mermaid">` blocks follows mermaid syntax rules, not HTML escaping. Within mermaid node labels (inside double quotes), escape `<` and `>` with `&lt;` and `&gt;`.
+
 ### Step 9 — Assemble the HTML
 
 Use the template from the knowledge injection (plan-visualizer-template.html) as your structural skeleton:
@@ -189,17 +287,22 @@ Use the template from the knowledge injection (plan-visualizer-template.html) as
 - **Delete** the example flow-step blocks in the BEFORE/AFTER panels entirely and replace them with the actual plan content you extracted
 - **Delete** the example bottom-bar items entirely and replace them with actual plan content
 - **Replace** all `{{PLACEHOLDER}}` values in the header
-- **Add or remove** `.bottom-panel` blocks — include only sections that have meaningful content (Key Changes, Key Decisions, Risks are default; Out of Scope / Success / Deferred are optional)
+- **Add or remove** `.bottom-panel` blocks — include only sections that have meaningful content, respecting the max 5 sections limit and priority order
 - **Profile badge:** If the plan has no `**Profile:**` line, omit the `<span class="badge badge-profile">` element entirely
 
 **Plan link format:**
 ```html
-<a class="plan-link" href="file:///{{ABSOLUTE_PATH_TO_PLAN_FILE}}">
+<a class="plan-link" href="{{URL_PROTOCOL}}:///{{PLAN_FILE_ABSOLUTE_PATH}}">
   <svg viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
   {{PLAN_FILE_BASENAME}}
 </a>
 ```
-The SVG icon is a file-text icon (inline, no CDN dependency). The protocol is `file://` followed by the absolute path (e.g., `file:///Users/dev/project/plans/my-plan.md`). The absolute path starts with `/`, giving three slashes total after `file:`.
+
+Replace `{{URL_PROTOCOL}}` with the protocol value from Step 1.5 (e.g., `file`, `open-cursor`, `vscode`). The protocol value is followed by `://` and then the absolute path. The absolute path starts with `/`, giving three slashes total (e.g., `open-cursor:///Users/dev/project/plans/my-plan.md`).
+
+**Architecture diagram:** If you generated a mermaid diagram in Step 5.5, insert it into the `.diagram-section .mermaid` container (replace `{{ARCHITECTURE_MERMAID}}`). Also set the `data-raw` attribute on the `.mermaid` div to the raw mermaid source (for fallback display). If no diagram was generated, **remove the entire `.diagram-section`** from the output.
+
+**Feedback system:** The feedback HTML/JS at the end of `<body>` is baked into the template. Do NOT modify or remove it — it works automatically.
 
 **Date format:** `YYYY-MM-DD`
 
@@ -219,9 +322,9 @@ After successfully writing the HTML file, update the plan file to add a clickabl
 
 **Link format:**
 ```
-- **Visualization:** [basename.visualization.html](file:///absolute/path/to/basename.visualization.html)
+- **Visualization:** [basename.visualization.html](PROTOCOL:///absolute/path/to/basename.visualization.html)
 ```
-Where `basename.visualization.html` is the actual output filename (e.g., `my-plan.visualization.html`) and the URL is `file://` followed by the absolute path.
+Where `basename.visualization.html` is the actual output filename and `PROTOCOL` is the protocol value from Step 1.5 (default: `file`).
 
 **How to insert:**
 1. Read the plan file
@@ -230,7 +333,7 @@ Where `basename.visualization.html` is the actual output filename (e.g., `my-pla
    ```
    ## Sidecar References
    
-   - **Visualization:** [basename.visualization.html](file:///absolute/path/to/basename.visualization.html)
+   - **Visualization:** [basename.visualization.html](PROTOCOL:///absolute/path/to/basename.visualization.html)
    ```
 
 ### Step 12 — Open in Chrome
@@ -248,6 +351,8 @@ Use the actual absolute path written in Step 10. Non-zero exit code is not an er
 After writing, tell the user:
 - The output path
 - How many flow-steps are in BEFORE and AFTER panels
+- Whether an architecture diagram was included
+- How many bottom sections were included (and which ones)
 - Any content that was difficult to extract or had to be approximated
 
 ---
@@ -256,8 +361,8 @@ After writing, tell the user:
 
 - **Max 6 flow-steps per panel** — if the plan has more components, group related ones
 - **Max 4 bullets per box** — pick the most informative facts
+- **Max 5 bottom sections** — prioritize: Steps > Success Criteria > Key Changes > Key Decisions > Risks > Assumptions > In Scope > Out of Scope > Deferred
 - **Max 5 items per bottom section** — pick the most important
-- **Bottom sections:** Key Changes + Key Decisions + Risks are default. Add Out of Scope / Success Criteria / Deferred only if the plan has meaningful content for them.
 - **The BEFORE and AFTER panels should have the same number of flow-steps** — pad with relevant unchanged anchors if needed so the two sides align visually
 
 ---
@@ -267,5 +372,6 @@ After writing, tell the user:
 - **Multi-step migration plan** ("Step 1 of N"): Scope the visualization to the CURRENT step only. Add `· Step N of M` to the plan title badge.
 - **Greenfield plan** (nothing exists yet): BEFORE panel shows `.missing` boxes for the components that need to be built. Label them with what's absent.
 - **Operational plan** (no code changes to THIS repo): Use CURRENT / TARGET labels. Omit the change legend. Show target state as repo cards or pipeline steps instead of code component boxes.
-- **Plan with no explicit risks**: Omit the RISKS section from the bottom; include OUT OF SCOPE or DEFERRED section instead if relevant.
+- **Plan with no explicit risks**: Omit the RISKS section from the bottom; include other sections based on priority.
 - **Generation failure** (e.g., plan file not found): Report the error clearly. Do not write a partial file.
+- **No config file**: Default to `file` protocol. Do not report an error.

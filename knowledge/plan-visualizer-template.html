@@ -4,6 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{PLAN_TITLE}}</title>
+<script src="https://unpkg.com/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Capture raw source before mermaid processes it
+  document.querySelectorAll('.mermaid').forEach(function(el) {
+    if (!el.getAttribute('data-raw')) el.setAttribute('data-raw', el.textContent);
+  });
+
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#0f2640',
+        primaryTextColor: '#e0e8f0',
+        primaryBorderColor: '#00d4ff',
+        lineColor: '#00d4ff66',
+        secondaryColor: '#191008',
+        tertiaryColor: '#0a1628',
+        background: '#0a1628',
+        mainBkg: '#0d1f35',
+        nodeBorder: '#00d4ff33'
+      },
+      flowchart: { curve: 'basis', padding: 12 }
+    });
+    mermaid.run().catch(function() {
+      document.querySelectorAll('.mermaid').forEach(function(el) {
+        if (!el.querySelector('svg') || el.querySelector('[id*="error"]')) {
+          el.innerHTML = '<pre class="mermaid-fallback">' + (el.getAttribute('data-raw') || '') + '</pre>';
+        }
+      });
+    });
+  } else {
+    document.querySelectorAll('.mermaid').forEach(function(el) {
+      el.innerHTML = '<pre class="mermaid-fallback">' + (el.getAttribute('data-raw') || '') + '</pre>';
+    });
+  }
+});
+</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -13,6 +52,7 @@
     padding: 24px;
     min-height: 100vh;
   }
+  ::selection { background: #00d4ff44; color: #fff; }
   .infographic {
     max-width: 1200px;
     margin: 0 auto;
@@ -114,6 +154,28 @@
   .ld-changed { background: #191008; border: 1px solid #f0a030cc; }
   .ld-removed { background: #140808; border: 1px dashed #ff505077; }
   .ld-same    { background: #0a1628; border: 1px solid #ffffff20; opacity: 0.85; }
+
+  /* ── Architecture diagram (mermaid) ── */
+  .diagram-section {
+    padding: 20px 28px;
+    border-bottom: 1px solid #00d4ff22;
+    background: #060e1a;
+    text-align: center;
+  }
+  .diagram-label {
+    font-size: 13px; font-weight: 700; color: #00d4ff;
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #00d4ff22;
+    text-align: left;
+  }
+  .diagram-section .mermaid { display: flex; justify-content: center; }
+  .diagram-section .mermaid svg { max-width: 100%; height: auto; }
+  .mermaid-fallback {
+    text-align: left; font-size: 11px; color: #8899aa;
+    background: #0a1628; border: 1px solid #ffffff15;
+    border-radius: 4px; padding: 12px; overflow-x: auto;
+    white-space: pre-wrap; word-break: break-word;
+  }
 
   /* ── Panels ── */
   .panels { display: grid; grid-template-columns: 1fr 2px 1fr; }
@@ -221,8 +283,142 @@
   .bi.deferred::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23667788' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='10' x2='10' y1='15' y2='9'/%3E%3Cline x1='14' x2='14' y1='15' y2='9'/%3E%3C/svg%3E");
   }
+  .bi.step::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M9 12h6'/%3E%3Cpath d='M9 16h6'/%3E%3Cpath d='M9 8h6'/%3E%3C/svg%3E");
+  }
+  .bi.assumption::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a080d0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  }
 
   code { background: #00d4ff10; padding: 1px 4px; border-radius: 2px; font-size: inherit; color: #e0e8f0; }
+
+  /* ── Feedback system ── */
+  .feedback-fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: #0d1f35; border: 2px solid #00d4ff44;
+    color: #00d4ff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; transition: all 0.2s ease;
+    box-shadow: 0 2px 12px #00000066;
+  }
+  .feedback-fab:hover { background: #0f2640; border-color: #00d4ff88; transform: scale(1.05); }
+  .feedback-fab .fab-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: #00d4ff; color: #0a1628; font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+  }
+  .feedback-fab .fab-badge.visible { display: flex; }
+  .feedback-popover {
+    position: fixed; z-index: 1001;
+    background: #0d1f35; border: 1px solid #00d4ff44;
+    border-radius: 6px; padding: 10px;
+    max-width: 320px; min-width: 240px;
+    box-shadow: 0 4px 20px #00000088;
+    display: none;
+  }
+  .feedback-popover.visible { display: block; }
+  .feedback-popover textarea {
+    width: 100%; background: #0a1628; border: 1px solid #00d4ff33;
+    border-radius: 4px; color: #e0e8f0; font-family: inherit;
+    font-size: 11px; padding: 6px 8px; resize: vertical;
+    min-height: 48px;
+  }
+  .feedback-popover textarea:focus { outline: none; border-color: #00d4ff66; }
+  .feedback-popover .pop-selected {
+    font-size: 10px; color: #00d4ff; margin-bottom: 6px;
+    max-height: 36px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .feedback-popover .pop-actions {
+    display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end;
+  }
+  .feedback-popover button {
+    font-family: inherit; font-size: 10px; padding: 4px 12px;
+    border-radius: 3px; cursor: pointer; border: none;
+  }
+  .feedback-popover .pop-add {
+    background: #00d4ff; color: #0a1628; font-weight: 600;
+  }
+  .feedback-popover .pop-cancel {
+    background: transparent; color: #667788; border: 1px solid #ffffff15;
+  }
+  .feedback-panel {
+    position: fixed; bottom: 80px; right: 24px; z-index: 1000;
+    width: 360px; max-height: 60vh;
+    background: #0d1f35; border: 1px solid #00d4ff44;
+    border-radius: 8px; box-shadow: 0 4px 24px #00000088;
+    display: none; flex-direction: column;
+    overflow: hidden;
+  }
+  .feedback-panel.visible { display: flex; }
+  .feedback-panel-header {
+    padding: 10px 14px; border-bottom: 1px solid #00d4ff22;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; font-weight: 600; color: #00d4ff;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .feedback-panel-header button {
+    font-family: inherit; font-size: 10px; padding: 4px 10px;
+    border-radius: 3px; cursor: pointer;
+    background: #00d4ff; color: #0a1628; font-weight: 600; border: none;
+  }
+  .feedback-panel-items {
+    overflow-y: auto; flex: 1; padding: 8px;
+  }
+  .feedback-item {
+    padding: 8px 10px; margin-bottom: 6px;
+    background: #0a1628; border: 1px solid #ffffff10;
+    border-radius: 4px; font-size: 11px;
+  }
+  .feedback-item .fi-marked {
+    color: #00d4ff; font-size: 10px;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .feedback-item .fi-comment { color: #c0ccd8; margin-top: 3px; }
+  .feedback-item .fi-delete {
+    float: right; cursor: pointer; color: #ff606088;
+    font-size: 10px; background: none; border: none; font-family: inherit;
+  }
+  .feedback-item .fi-delete:hover { color: #ff6060; }
+  .feedback-textarea-wrap {
+    position: fixed; bottom: 80px; right: 24px; z-index: 1001;
+    width: 400px; display: none;
+    background: #0d1f35; border: 1px solid #00d4ff44;
+    border-radius: 8px; box-shadow: 0 4px 24px #00000088;
+    padding: 12px;
+  }
+  .feedback-textarea-wrap.visible { display: block; }
+  .feedback-textarea-wrap textarea {
+    width: 100%; min-height: 120px; background: #0a1628;
+    border: 1px solid #00d4ff33; border-radius: 4px;
+    color: #e0e8f0; font-family: inherit; font-size: 11px;
+    padding: 8px; resize: vertical;
+  }
+  .feedback-textarea-wrap .ftw-hint {
+    font-size: 10px; color: #667788; margin-top: 6px;
+  }
+  .feedback-textarea-wrap button {
+    font-family: inherit; font-size: 10px; padding: 4px 10px;
+    border-radius: 3px; cursor: pointer; margin-top: 6px;
+    background: transparent; color: #667788; border: 1px solid #ffffff15;
+  }
+  .feedback-toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: #00d4ff; color: #0a1628; font-size: 11px; font-weight: 600;
+    padding: 8px 16px; border-radius: 4px; z-index: 1002;
+    opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+  }
+  .feedback-toast.visible { opacity: 1; }
+  .feedback-panel-empty {
+    padding: 20px; text-align: center; color: #667788; font-size: 11px;
+  }
+  .feedback-highlight-overlay {
+    position: absolute; background: #00d4ff33;
+    border-radius: 2px; pointer-events: none; z-index: 999;
+    outline: 1px solid #00d4ff44;
+  }
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
@@ -232,6 +428,8 @@
     .panels { grid-template-columns: 1fr; }
     .divider { height: 2px; width: 100%; }
     .bottom-panel { padding: 12px 16px; }
+    .feedback-panel { width: calc(100vw - 48px); right: 24px; }
+    .feedback-textarea-wrap { width: calc(100vw - 48px); }
   }
   @media (max-width: 480px) {
     .legend { flex-wrap: wrap; gap: 10px; }
@@ -249,7 +447,9 @@
        - badge-profile: profile + reason (e.g. "standard profile")
          CONDITIONAL: omit this element entirely if plan has no **Profile:** line
        - badge-scope: N files · N steps
-       - plan-link: href uses file:///ABSOLUTE_PATH_TO_PLAN_FILE
+       - plan-link: href uses CONFIGURED_PROTOCOL://ABSOLUTE_PATH_TO_PLAN_FILE
+         The protocol comes from ~/.claude/plan-visualizer.json → url_protocol field.
+         Default: file. Examples: file, open-cursor, vscode
        ═══════════════════════════════════════════════════════ -->
   <div class="header">
     <div class="header-left">
@@ -260,7 +460,7 @@
       <!-- Include ONLY if plan has a **Profile:** line; omit entirely otherwise -->
       <span class="badge badge-profile">{{PROFILE}} profile</span>
       <span class="badge badge-scope">{{N_FILES}} files · {{N_STEPS}} steps</span>
-      <a class="plan-link" href="file:///{{PLAN_FILE_ABSOLUTE_PATH}}">
+      <a class="plan-link" href="{{URL_PROTOCOL}}:///{{PLAN_FILE_ABSOLUTE_PATH}}">
         <svg viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
         {{PLAN_FILE_BASENAME}}
       </a>
@@ -278,6 +478,43 @@
     <span class="legend-item"><span class="legend-dot ld-changed"></span>Changed</span>
     <span class="legend-item"><span class="legend-dot ld-removed"></span>Removed</span>
     <span class="legend-item"><span class="legend-dot ld-same"></span>Unchanged</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ARCHITECTURE OVERVIEW (MERMAID) — OPTIONAL
+
+       Include this section when the plan has 3+ components with
+       relationships (dependencies, data flow, call chains).
+       Skip for simple linear plans with 2-3 independent components.
+
+       The agent generates a mermaid graph definition showing component
+       relationships with diff-status styling via classDef:
+
+         classDef added fill:#0f2640,stroke:#00d4ff,stroke-width:2px,color:#e0e8f0
+         classDef changed fill:#191008,stroke:#f0a030,stroke-width:2px,color:#e0e8f0
+         classDef removed fill:#140808,stroke:#ff5050,stroke-width:2px,stroke-dasharray:5 5,color:#e0e8f0
+         classDef unchanged fill:#0a1628,stroke:#ffffff33,color:#8899aa
+
+       If no architecture diagram is needed, REMOVE this entire section.
+
+       EXAMPLE mermaid block:
+         graph TD
+           A["Agent Prompt"]:::changed -→ B["HTML Template"]:::changed
+           A -→ C["Config File"]:::added
+           B -→ D["Mermaid.js"]:::added
+           B -→ E["Flow Boxes"]:::unchanged
+
+       RULES:
+       - Wrap node labels in double quotes
+       - Escape < > with HTML entities in labels
+       - Max 8-10 nodes
+       - Use subgraphs for logical grouping when helpful
+       ═══════════════════════════════════════════════════════ -->
+  <div class="diagram-section">
+    <div class="diagram-label">Architecture Overview</div>
+    <div class="mermaid">
+      {{ARCHITECTURE_MERMAID}}
+    </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════
@@ -394,27 +631,31 @@
   <!-- ═══════════════════════════════════════════════════════
        BOTTOM SECTIONS (stacked vertically, full width)
 
-       Include only the sections that have meaningful content.
-       Recommended: Key Changes, Key Decisions, Risks.
-       Optional: Out of Scope, Success Criteria, Deferred.
+       Include max 5 bottom sections. Always include Steps and
+       Success Criteria when present. Prioritize:
+         Steps > Success Criteria > Key Changes > Key Decisions >
+         Risks > Assumptions > In Scope > Out of Scope > Deferred
 
        Section labels — use exactly these emoji + names:
-         🔀 Key Changes   — what moved, renamed, replaced
-         💡 Key Decisions — architectural choices + rationale
-         ⚠️ Risks         — what could go wrong + mitigation
-         ❎ Out of Scope  — explicitly excluded items
-         ✅ Success Criteria — definition of done
-         ⏸ Deferred      — punted to a later step/task
+         📋 Implementation Steps — step descriptions + verification
+         ✅ Success Criteria      — definition of done
+         🔀 Key Changes          — what moved, renamed, replaced
+         💡 Key Decisions        — architectural choices + rationale
+         ⚠️ Risks                — what could go wrong + mitigation
+         🔍 Assumptions          — stated assumptions for review
+         ✅ In Scope             — explicitly included items
+         ❎ Out of Scope         — explicitly excluded items
+         ⏸ Deferred             — punted to a later step/task
 
-       Item types (icons rendered via CSS data-URI SVGs — no JS needed):
-         .bi.change   → key changes
-         .bi.decision → architectural choices
-         .bi.risk     → risks
-         .bi.scope    → out of scope
-         .bi.success  → success criteria
-         .bi.deferred → deferred items
-
-       Items wrap into 2 columns on wide screens (.bi-items flex-wrap).
+       Item types (icons rendered via CSS data-URI SVGs):
+         .bi.step       → implementation steps
+         .bi.success    → success criteria / in scope
+         .bi.change     → key changes
+         .bi.decision   → architectural choices
+         .bi.risk       → risks
+         .bi.assumption → assumptions
+         .bi.scope      → out of scope
+         .bi.deferred   → deferred items
 
        RULES:
        - Max 5 items per section
@@ -422,6 +663,13 @@
        - Use <code> for symbols, function names, file paths
        ═══════════════════════════════════════════════════════ -->
   <div class="bottom">
+    <div class="bottom-panel">
+      <div class="bottom-label"><span class="si">📋</span> Implementation Steps</div>
+      <div class="bi-items">
+        <div class="bi step">Step 1 — Description · Verify: criterion</div>
+        <div class="bi step">Step 2 — Description · Verify: criterion</div>
+      </div>
+    </div>
     <div class="bottom-panel">
       <div class="bottom-label"><span class="si">🔀</span> Key Changes</div>
       <div class="bi-items">
@@ -444,8 +692,226 @@
         <div class="bi risk">Risk 2</div>
       </div>
     </div>
+    <div class="bottom-panel">
+      <div class="bottom-label"><span class="si">✅</span> Success Criteria</div>
+      <div class="bi-items">
+        <div class="bi success">Observable criterion 1</div>
+        <div class="bi success">Observable criterion 2</div>
+      </div>
+    </div>
   </div>
 
 </div>
+
+<!-- ═══════════════════════════════════════════════════════
+     FEEDBACK SYSTEM
+     Allows reviewers to select text, add comments, and copy
+     structured feedback to clipboard for pasting into the agent.
+     This section is baked into the template — do NOT modify or remove.
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="feedback-fab" onclick="togglePanel()" title="Review feedback">
+  <span>💬</span>
+  <span class="fab-badge" id="fabBadge">0</span>
+</div>
+
+<div class="feedback-popover" id="feedbackPopover">
+  <div class="pop-selected" id="popSelected"></div>
+  <textarea id="popComment" placeholder="Add your comment..." rows="2"></textarea>
+  <div class="pop-actions">
+    <button class="pop-cancel" onclick="hidePopover()">Cancel</button>
+    <button class="pop-add" onclick="submitFeedback()">Add</button>
+  </div>
+</div>
+
+<div class="feedback-panel" id="feedbackPanel">
+  <div class="feedback-panel-header">
+    <span>Feedback (<span id="panelCount">0</span>)</span>
+    <button onclick="copyFeedback()">Copy Feedback</button>
+  </div>
+  <div class="feedback-panel-items" id="panelItems"></div>
+</div>
+
+<div class="feedback-textarea-wrap" id="feedbackTextarea">
+  <textarea id="ftaContent" readonly></textarea>
+  <div class="ftw-hint">Select all and copy (Ctrl+C / Cmd+C)</div>
+  <button onclick="closeFeedbackTextarea()">Close</button>
+</div>
+
+<div class="feedback-toast" id="feedbackToast"></div>
+
+<script>
+(function() {
+  var items = [];
+  var currentSelection = '';
+  var highlightOverlays = [];
+  var popover = document.getElementById('feedbackPopover');
+  var panel = document.getElementById('feedbackPanel');
+  var badge = document.getElementById('fabBadge');
+  var popSelected = document.getElementById('popSelected');
+  var popComment = document.getElementById('popComment');
+  var panelCount = document.getElementById('panelCount');
+  var panelItems = document.getElementById('panelItems');
+
+  document.addEventListener('mouseup', function(e) {
+    if (e.target.closest('.feedback-popover, .feedback-panel, .feedback-fab, .feedback-textarea-wrap')) return;
+    var sel = window.getSelection().toString().trim();
+    if (sel.length > 0 && sel.length < 500) { // cap to avoid capturing entire page drags
+      currentSelection = sel;
+      showPopover(e);
+    } else {
+      hidePopover();
+    }
+  });
+
+  document.addEventListener('scroll', function() { clearHighlight(); }, true);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { hidePopover(); closeFeedbackTextarea(); }
+    if (e.key === 'Enter' && !e.shiftKey && document.activeElement === popComment) {
+      e.preventDefault(); submitFeedback();
+    }
+  });
+
+  function highlightSelection() {
+    clearHighlight();
+    var sel = window.getSelection();
+    if (sel.rangeCount === 0) return;
+    var rects = sel.getRangeAt(0).getClientRects();
+    for (var i = 0; i < rects.length; i++) {
+      var r = rects[i];
+      if (r.width < 2) continue;
+      var div = document.createElement('div');
+      div.className = 'feedback-highlight-overlay';
+      div.style.left = (r.left + window.scrollX) + 'px';
+      div.style.top = (r.top + window.scrollY) + 'px';
+      div.style.width = r.width + 'px';
+      div.style.height = r.height + 'px';
+      document.body.appendChild(div);
+      highlightOverlays.push(div);
+    }
+    sel.removeAllRanges();
+  }
+
+  function clearHighlight() {
+    highlightOverlays.forEach(function(el) { el.remove(); });
+    highlightOverlays = [];
+  }
+
+  function showPopover(e) {
+    highlightSelection();
+    popSelected.textContent = currentSelection.length > 80
+      ? currentSelection.substring(0, 80) + '...' : currentSelection;
+    popComment.value = '';
+    var x = Math.min(e.clientX, window.innerWidth - 340);
+    var y = Math.min(e.clientY + 10, window.innerHeight - 140);
+    popover.style.left = Math.max(12, x) + 'px';
+    popover.style.top = Math.max(12, y) + 'px';
+    popover.classList.add('visible');
+    setTimeout(function() { popComment.focus(); }, 50);
+  }
+
+  window.hidePopover = function() {
+    clearHighlight();
+    popover.classList.remove('visible');
+    currentSelection = '';
+  };
+
+  window.submitFeedback = function() {
+    var comment = popComment.value.trim();
+    if (!comment || !currentSelection) return;
+    items.push({ marked: currentSelection, comment: comment });
+    hidePopover();
+    updateBadge();
+    renderPanel();
+  };
+
+  window.togglePanel = function() {
+    var ta = document.getElementById('feedbackTextarea');
+    if (ta.classList.contains('visible')) { ta.classList.remove('visible'); return; }
+    panel.classList.toggle('visible');
+    renderPanel();
+  };
+
+  function updateBadge() {
+    badge.textContent = items.length;
+    badge.classList.toggle('visible', items.length > 0);
+    panelCount.textContent = items.length;
+  }
+
+  function renderPanel() {
+    if (items.length === 0) {
+      panelItems.innerHTML = '<div class="feedback-panel-empty">Select text on the page and add comments to build feedback.</div>';
+      return;
+    }
+    panelItems.innerHTML = '';
+    items.forEach(function(item, i) {
+      var marked = item.marked.length > 60 ? item.marked.substring(0, 60) + '...' : item.marked;
+      var div = document.createElement('div');
+      div.className = 'feedback-item';
+      var btn = document.createElement('button');
+      btn.className = 'fi-delete';
+      btn.textContent = 'remove';
+      btn.onclick = function() { removeFeedback(i); };
+      var mDiv = document.createElement('div');
+      mDiv.className = 'fi-marked';
+      mDiv.textContent = '\u201C' + marked + '\u201D';
+      var cDiv = document.createElement('div');
+      cDiv.className = 'fi-comment';
+      cDiv.textContent = item.comment;
+      div.appendChild(btn);
+      div.appendChild(mDiv);
+      div.appendChild(cDiv);
+      panelItems.appendChild(div);
+    });
+  }
+
+  window.removeFeedback = function(i) {
+    items.splice(i, 1);
+    updateBadge();
+    renderPanel();
+  };
+
+  window.copyFeedback = function() {
+    if (items.length === 0) return;
+    var text = 'Feedback about the plan:\n' + items.map(function(item, i) {
+      return (i + 1) + '. About `' + item.marked + '`: ' + item.comment;
+    }).join('\n');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied to clipboard!');
+      }).catch(function() { showTextarea(text); });
+    } else {
+      showTextarea(text);
+    }
+  };
+
+  function showTextarea(text) {
+    panel.classList.remove('visible');
+    var wrap = document.getElementById('feedbackTextarea');
+    var ta = document.getElementById('ftaContent');
+    ta.value = text;
+    wrap.classList.add('visible');
+    ta.focus();
+    ta.select();
+  }
+
+  window.closeFeedbackTextarea = function() {
+    document.getElementById('feedbackTextarea').classList.remove('visible');
+  };
+
+  function showToast(msg) {
+    var toast = document.getElementById('feedbackToast');
+    toast.textContent = msg;
+    toast.classList.add('visible');
+    setTimeout(function() { toast.classList.remove('visible'); }, 2000);
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
 </body>
 </html>
