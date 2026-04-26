@@ -1,0 +1,109 @@
+{
+  "skill_name": "plan-visualizer-skills",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just finished writing a migration plan at plans/migrate-auth-service.md — can you visualize this plan so I can review the architecture changes?",
+      "expected_output": "Should trigger plan-visualizer. Generates an interactive HTML visualization from the markdown plan showing BEFORE/AFTER architecture with diff-marked components.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "generate plan visualization for plans/refactor-payment-flow.md",
+      "expected_output": "Should trigger plan-visualizer. Creates HTML visualization with mermaid diagrams and component diffs.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "hey can you create plan diagram from the implementation plan I wrote? it's at ~/projects/work/plans/api-redesign.md",
+      "expected_output": "Should trigger plan-visualizer. Generates visualization showing the plan's architecture and key decisions.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I need to present this refactoring plan to my team tomorrow. Can you show plan architecture in a visual format? The plan file is plans/database-migration.md",
+      "expected_output": "Should trigger plan-visualizer. Creates a browser-viewable HTML visualization with before/after architecture panels.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "We wrote up a detailed implementation plan for the new search feature. show me the plan in a format that's easier to review — plans/search-implementation.md",
+      "expected_output": "Should trigger plan-visualizer. Generates interactive HTML with component relationships and implementation steps.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "I have this huge markdown file explaining our system redesign with like 15 steps and a bunch of components. Can you turn it into something visual that shows the before/after state? File is at plans/system-redesign-v2.md",
+      "expected_output": "Should trigger plan-visualizer. Creates visualization showing the transformation with diff-marked components and mermaid diagrams.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "visualize the plan at plans/kubernetes-migration.md",
+      "expected_output": "Should trigger plan-visualizer. Generates HTML visualization from the markdown plan file.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Need to get stakeholder review on this big refactoring plan. Can you make it into an HTML doc with diagrams showing what's changing? The plan markdown is in plans/monolith-to-microservices.md",
+      "expected_output": "Should trigger plan-visualizer. Generates interactive HTML with architecture diagrams and annotation system for feedback.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "My plan file has a ton of detail about the database schema changes. Can you show the architecture in a diagram format?",
+      "expected_output": "Should trigger plan-visualizer. Creates visualization with mermaid architecture overview and component details.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": true,
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "Can you open the plan file and walk me through what each step does?",
+      "expected_output": "Should NOT trigger plan-visualizer — user wants explanation/walkthrough, not visualization generation.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": false,
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "I need to write a plan for migrating our auth system from JWT to OAuth. Can you help draft the plan structure?",
+      "expected_output": "Should NOT trigger plan-visualizer — user wants to write/draft a plan, not visualize an existing one.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": false,
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "What's the current status of the implementation plan we created last week? Have any of the steps been completed?",
+      "expected_output": "Should NOT trigger plan-visualizer — user asking about implementation progress, not requesting visualization.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": false,
+      "files": []
+    },
+    {
+      "id": 13,
+      "prompt": "Read plans/frontend-redesign.md and tell me if the steps are in the right order",
+      "expected_output": "Should NOT trigger plan-visualizer — user wants plan review/feedback, not visualization generation.",
+      "target_skill": "plan-visualizer",
+      "should_trigger": false,
+      "files": []
+    }
+  ]
+}
